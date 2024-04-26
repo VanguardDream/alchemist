@@ -1,0 +1,5 @@
+{
+    "sketch": "FSR_HoverController\\FSR_HoverController.ino",
+    "configuration": "upload_method=UploadMethod",
+    "board": "OpenCR:OpenCR:OpenCR"
+}
