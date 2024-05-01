@@ -215,15 +215,20 @@ void printFSRValues_filtered()
 {
 	for (int i = 0; i < 6; i++)
 	{
+		Serial.print(plate1_filtered[i]);
 		Serial1.print(plate1_filtered[i]);
+		Serial.print(",");
 		Serial1.print(",");
 	}
 
 	for (int i = 0; i < 5; i++)
 	{
+		Serial.print(plate2_filtered[i]);
 		Serial1.print(plate2_filtered[i]);
+		Serial.print(",");
 		Serial1.print(",");
 	}
+	Serial.println(plate2_filtered[5]);
 	Serial1.println(plate2_filtered[5]);
 }
 
@@ -512,17 +517,10 @@ void setup()
 	Timer.attachInterrupt(mTimerFunc);
 	Timer.start();
 
-	edf_rudder1.attach(EDF_RUDD1);
-	edf_rudder2.attach(EDF_RUDD2);
-	edf_throttle1.attach(EDF_THRT1);
-	//edf_throttle2.attach(EDF_THRT2);
-
-	edf_rudder1.writeMicroseconds(PWM_MIN);
-	edf_rudder2.writeMicroseconds(PWM_MIN);
-	edf_throttle1.writeMicroseconds(PWM_MIN);
-	//edf_throttle2.writeMicroseconds(PWM_MIN);
-
 	beep();
+    beep();
+    beep();
+
 	delay(6000); // wait for esc init.
 	Serial.println("IDLE");
 	Serial1.println("IDLE");
@@ -537,166 +535,5 @@ void loop()
 	getAllFSR();
 	delay(50);
 
-	switch (statusFlag)
-	{
-	case NOT_ON_THE_PLATFORM:
-		if(checkPlatePressure(statusFlag))
-		{
-			if(isCheckStart==false)
-			{
-				Serial.println("Hop on..");
-				Serial1.println("Hop on..");
-				isCheckStart = true;
-				beep();
-			}
-		}
-
-		else
-		{
-			if(isCheckStart == true)
-			{
-				isCheckStart = false;
-				Serial.println("Hop off..");
-				Serial1.println("Hop off..");
-				beep();
-			}
-		}
-
-		if(checkCnt > 5000)
-		{
-			beep();
-			beep();
-			statusFlag = ON_THE_PLATFORM;
-			isCheckStart = false;
-			onLED(2);
-			onLED(3);
-			Serial.println("Person detected..");
-			Serial1.println("Person detected..");
-			delay(1000);
-		}
-		break;
-	
-	case ON_THE_PLATFORM:
-		if(checkPlatePressure(statusFlag))
-		{
-			if(isOffsetRemoved==true)
-			{
-				//calculateCOP_filtered();
-				calculateCOP_kilogram();
-				//calculateCOP_simple();
-				//print_force();
-				printCOP();
-				Serial1.print(",");
-
-
-				dirVector = myClassifier(x_cop, y_cop);
-				switch (dirVector)
-				{
-				case _CEN:
-					stopCheck = false;
-					//Serial1.println("CENTER");
-					edf_rudder1.writeMicroseconds(PWM_MIN);
-					edf_rudder2.writeMicroseconds(PWM_MIN);
-					Serial.println("CEN");
-					Serial1.println("CEN");
-					break;
-
-				case _NORTH:
-					stopCheck = false;
-					//Serial1.println("NORTH");
-					edf_rudder1.writeMicroseconds(PWM_MIN);
-					edf_rudder2.writeMicroseconds(PWM_MIN);
-					Serial.println("RIGHT");
-					Serial1.println("RIGHT");
-					break;
-
-				case _SOUTH:
-					stopCheck = false;
-					//Serial1.println("SOUTH");
-					edf_rudder1.writeMicroseconds(PWM_MIN);
-					edf_rudder2.writeMicroseconds(PWM_MIN);
-					Serial.println("LEFT");
-					Serial1.println("LEFT");
-					break;
-
-				case _WEST:
-					stopCheck = false;
-					//Serial1.println("WEST");
-					edf_rudder1.writeMicroseconds(1700);
-					edf_rudder2.writeMicroseconds(1700);
-					Serial.println("FORWARD");
-					Serial1.println("FORWARD");
-					break;
-
-				case _EAST:
-					//Serial1.println("EAST");
-					if(stopCheck==false)
-					{
-						stopCheck = true;
-						beep();
-					}
-					else
-					{
-						if(stopCheckCnt > 2000)
-						{
-							stopCheck = false;
-							statusFlag = MOTOR_STOP;
-							edf_rudder1.writeMicroseconds(PWM_MIN);
-							edf_rudder2.writeMicroseconds(PWM_MIN);
-							edf_throttle1.writeMicroseconds(PWM_MIN);
-							//edf_throttle2.writeMicroseconds(PWM_MIN);
-							Serial.println("STOP");
-							Serial1.println("STOP");
-							beepTime(2000);
-						}
-					}
-					break;
-				}			
-			}
-
-			else
-			{
-				Serial.println("Calibration start..");
-				Serial1.println("Calibration start..");
-				offsetRemove();
-				isOffsetRemoved=true;
-				beepTime(1000);
-				Serial.println("Calibration done..");
-				Serial1.println("Calibration done..");
-
-				for(int i=1100; i<=1850; i++)
-				{
-					edf_throttle1.writeMicroseconds(i);
-					delay(4);
-				}
-			}
-		}
-		
-		else
-		{
-			Serial.println("Get off...");
-			Serial1.println("Get off...");
-			edf_rudder1.writeMicroseconds(PWM_MIN);
-			edf_rudder2.writeMicroseconds(PWM_MIN);
-			edf_throttle1.writeMicroseconds(PWM_MIN);
-			//edf_throttle2.writeMicroseconds(PWM_MIN);
-			statusFlag = NOT_ON_THE_PLATFORM;
-			isOffsetRemoved=false;
-			offLED(2);
-			offLED(3);
-			beep();
-		}
-		break;
-
-	case MOTOR_STOP:
-		if(checkPlatePressure(statusFlag)==0)
-		{
-			statusFlag = NOT_ON_THE_PLATFORM;
-			isOffsetRemoved=false;
-			offLED(2);
-			offLED(3);
-			beep();
-		}
-		break;
-	}	
+    printFSRValues_filtered();
 }
