@@ -379,7 +379,8 @@ int checkPlatePressure(int statusFlag)
 
 	if(statusFlag == NOT_ON_THE_PLATFORM)
 	{
-		if(fsum1 > 1500 && fsum2 > 1500)
+		// if(fsum1 > 1500 && fsum2 > 1500) //Origin
+		if(fsum1 > 30 && fsum2 > 30)
 		{
 			return 1;
 		}
@@ -390,7 +391,8 @@ int checkPlatePressure(int statusFlag)
 	}
 	else
 	{
-		if(fsum1 < 200 && fsum2 < 200)
+		// if(fsum1 < 200 && fsum2 < 200) //Origin
+		if(fsum1 < 20 && fsum2 < 20)
 		{
 			return 0;
 		}
